@@ -7,7 +7,7 @@ $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>dev
 endif
 
 # If on a tagged commit, use the tag instead of the commit
-ifneq ($(shell echo $(shell git describe --contains) | head -c 1),)
+ifneq ($(shell echo $(shell git describe --contains 2>/dev/null) | head -c 1),)
 GIT_VER := $(shell git describe --contains)
 else
 GIT_VER := $(shell git rev-parse --short HEAD)
@@ -33,19 +33,19 @@ endif
 #---------------------------------------------------------------------------------
 # Version number
 #---------------------------------------------------------------------------------
-ifneq ($(shell echo $(shell git describe --tags) | head -c 2 | tail -c 1),)
+ifneq ($(shell echo $(shell git describe --tags 2>/dev/null) | head -c 2 | tail -c 1),)
 VERSION_MAJOR := $(shell echo $(shell git describe --tags) | head -c 2 | tail -c 1)
 else
 VERSION_MAJOR := 0
 endif
 
-ifneq ($(shell echo $(shell git describe --tags) | head -c 4 | tail -c 1),)
+ifneq ($(shell echo $(shell git describe --tags 2>/dev/null) | head -c 4 | tail -c 1),)
 VERSION_MINOR := $(shell echo $(shell git describe --tags) | head -c 4 | tail -c 1)
 else
 VERSION_MINOR := 0
 endif
 
-ifneq ($(shell echo $(shell git describe --tags) | head -c 6 | tail -c 1),)
+ifneq ($(shell echo $(shell git describe --tags 2>/dev/null) | head -c 6 | tail -c 1),)
 VERSION_MICRO := $(shell echo $(shell git describe --tags) | head -c 6 | tail -c 1)
 else
 VERSION_MICRO := 0
@@ -69,7 +69,7 @@ endif
 #     - icon.png
 #     - <libctru folder>/default_icon.png
 #---------------------------------------------------------------------------------
-TARGET		:=	TWiLight_Menu++_Updater
+TARGET		:=	TWiLight_Menu++_Boxart_Downloader
 BUILD		:=	build
 UNIVCORE	:=	Universal-Core
 SOURCES		:=	$(UNIVCORE) source source/screens source/utils
@@ -80,7 +80,7 @@ GRAPHICS	:=	assets/gfx
 ROMFS		:=	romfs
 GFXBUILD	:=	$(ROMFS)/gfx
 APP_AUTHOR	:=	RocketRobz/Pk11
-APP_DESCRIPTION :=  	TWiLight Menu++ Updater
+APP_DESCRIPTION :=  	TWiLight Menu++ Boxart Downloader
 ICON		:=	app/icon.png
 BNR_IMAGE	:=  	app/banner.png
 BNR_AUDIO	:=	app/BannerAudio.wav
@@ -91,12 +91,12 @@ RSF_FILE	:=	app/build-cia.rsf
 #---------------------------------------------------------------------------------
 ARCH	:=	-march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
 
-CFLAGS	:=	-g -Wall -Wno-psabi -O2 -mword-relocations \
+CFLAGS	:=	-Wall -Wno-psabi -Ofast -mword-relocations \
 		-DVERSION_STRING=\"$(GIT_VER)\" \
-		-ffunction-sections \
+		-ffunction-sections -flto=auto \
 		$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM11 -D_3DS
+CFLAGS	+=	$(INCLUDE) -D__3DS__
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -fpermissive -std=gnu++17
 
@@ -248,9 +248,9 @@ $(OUTPUT).elf	:	$(OFILES)
 $(OUTPUT).cia	:	$(OUTPUT).elf $(OUTPUT).smdh
 	$(BANNERTOOL) makebanner -ci "../app/banner.cgfx" -a "../app/BannerAudio.wav" -o "../app/banner.bin"
 
-	$(BANNERTOOL) makesmdh -i "../app/icon.png" -s "TWiLight Menu++ Updater" -l "TWiLight Menu++ Updater" -p "$(APP_AUTHOR)" -o "../app/icon.bin"
+	$(BANNERTOOL) makesmdh -i "../app/icon.png" -s "TWiLight Menu++ Boxart Downloader" -l "TWiLight Menu++ Boxart Downloader" -p "$(APP_AUTHOR)" -o "../app/icon.bin"
 
-	$(MAKEROM) -f cia -target t -exefslogo -o "../TWiLight_Menu++_Updater.cia" -elf "../TWiLight_Menu++_Updater.elf" -rsf "../app/build-cia.rsf" -banner "../app/banner.bin" -icon "../app/icon.bin" -logo "../app/logo.bcma.lz" -DAPP_ROMFS="$(TOPDIR)/$(ROMFS)" -major $(VERSION_MAJOR) -minor $(VERSION_MINOR) -micro $(VERSION_MICRO) -DAPP_VERSION_MAJOR="$(VERSION_MAJOR)"
+	$(MAKEROM) -f cia -target t -exefslogo -o "../${TARGET}.cia" -elf "../${TARGET}.elf" -rsf "../app/build-cia.rsf" -banner "../app/banner.bin" -icon "../app/icon.bin" -logo "../app/logo.bcma.lz" -DAPP_ROMFS="$(TOPDIR)/$(ROMFS)" -major $(VERSION_MAJOR) -minor $(VERSION_MINOR) -micro $(VERSION_MICRO) -DAPP_VERSION_MAJOR="$(VERSION_MAJOR)"
 #---------------------------------------------------------------------------------
 # you need a rule like this for each extension you use as binary data
 #---------------------------------------------------------------------------------

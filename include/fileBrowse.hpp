@@ -11,7 +11,6 @@ struct DirEntry {
 	string name;
 	bool isDirectory;
 	char tid[5];
-	off_t size;
 };
 
 typedef struct {
@@ -19,8 +18,8 @@ typedef struct {
 	char gameCode[4];			//!< 4 characters for the game code.
 } sNDSHeadertitlecodeonly;
 
-void findNdsFiles(vector<DirEntry>& dirContents);
+void findNdsFiles(char *path, vector<DirEntry>& dirContents);
 
-void getDirectoryContents (vector<DirEntry>& dirContents);
+void getDirectoryContents (char *path, vector<DirEntry>& dirContents);
 
 #endif //FILE_BROWSE_HPP

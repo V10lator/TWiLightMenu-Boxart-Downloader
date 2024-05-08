@@ -6,7 +6,6 @@
 namespace Msg
 {
 	void DisplayMsg(std::string text);
-	bool promptMsg(std::string promptMsg);
 }
 
 #endif
